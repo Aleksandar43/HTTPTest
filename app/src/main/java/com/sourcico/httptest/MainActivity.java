@@ -31,6 +31,12 @@ public class MainActivity extends AppCompatActivity {
     Button sendButton;
     TextView ipText;
 
+    static {
+        System.loadLibrary("getaddr");
+    }
+
+    private native String getAddressToSend();
+
     private class ConnectThread extends Thread{
         @Override
         public void run() {
@@ -65,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                 conn.setRequestProperty("Accept","application/json");
 
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("address", "2001::1");
+                jsonObject.put("address", getAddressToSend());
 
                 Log.i(TAG, "ConnectThread sending data " + jsonObject.toString());
                 Log.i(TAG, "ConnectThread request method= " + conn.getRequestMethod());

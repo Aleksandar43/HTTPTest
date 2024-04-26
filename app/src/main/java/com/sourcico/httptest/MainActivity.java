@@ -16,11 +16,10 @@ import androidx.core.view.WindowInsetsCompat;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -34,22 +33,31 @@ public class MainActivity extends AppCompatActivity {
     private class ConnectThread extends Thread{
         @Override
         public void run() {
+            HttpURLConnection conn;
             try {
                 URL url = new URL(SERVER);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setDoInput(true);
+                conn = (HttpURLConnection) url.openConnection();
+            } catch (IOException e) {
+                Log.e(TAG, "Opening connection failed!");
+                e.printStackTrace();
+                return;
+            }
+
+            try {
+                //conn.setDoInput(true);
                 conn.setDoOutput(true);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept","application/json");
 
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("address", "::1");
+                jsonObject.put("address", "2001::1");
 
-                Log.i(TAG, "ConnectThread sending data " + jsonObject);
+                Log.i(TAG, "ConnectThread sending data " + jsonObject.toString());
+                Log.i(TAG, "ConnectThread request method= " + conn.getRequestMethod());
 
-                OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream());
-                osw.write(jsonObject.toString());
+                DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
+                dos.writeBytes(jsonObject.toString());
 
                 int responseCode = conn.getResponseCode();
                 Log.i(TAG, "ConnectThread response code=" + responseCode);
@@ -57,25 +65,39 @@ public class MainActivity extends AppCompatActivity {
                     BufferedReader isr = new BufferedReader(
                             new InputStreamReader(
                                     conn.getInputStream()));
-                    //BufferedInputStream bis = new BufferedInputStream(conn.getInputStream());
-
-
+                    String outputData = "";
                     String serverData = isr.readLine();
-                    Log.i(TAG, "ConnectThread received data " + serverData);
+                    while(serverData != null){
+                        outputData += serverData;
+                        serverData = isr.readLine();
+                    }
+                    Log.i(TAG, "ConnectThread received data " + outputData);
+                    String finalOutputData = outputData;
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             ipText.setTextColor(Color.parseColor("#008800"));
-                            ipText.setText(serverData);
+                            ipText.setText(finalOutputData);
                             sendButton.setEnabled(true);
                         }
                     });
                 } else{
+                    String responseMessage = conn.getResponseMessage();
+                    BufferedReader isr = new BufferedReader(
+                            new InputStreamReader(
+                                    conn.getErrorStream()));
+                    String errorData = "";
+                    String serverData = isr.readLine();
+                    while(serverData != null){
+                        errorData += serverData;
+                        serverData = isr.readLine();
+                    }
+                    Log.i(TAG, "ConnectThread received error data " + errorData);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             ipText.setTextColor(Color.parseColor("#000000"));
-                            ipText.setText("Server returned response code " + responseCode);
+                            ipText.setText("Server returned response code " + responseCode + "\nResponse message: " + responseMessage);
                             sendButton.setEnabled(true);
                         }
                     });
@@ -86,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
                 //throw new RuntimeException(e);
+            } finally {
+                conn.disconnect();
             }
         }
     }

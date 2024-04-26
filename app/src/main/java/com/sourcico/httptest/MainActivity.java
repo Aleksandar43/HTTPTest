@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -33,6 +34,13 @@ public class MainActivity extends AppCompatActivity {
     private class ConnectThread extends Thread{
         @Override
         public void run() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            });
+
             HttpURLConnection conn;
             try {
                 URL url = new URL(SERVER);
@@ -40,6 +48,12 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 Log.e(TAG, "Opening connection failed!");
                 e.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    }
+                });
                 return;
             }
 
@@ -110,6 +124,12 @@ public class MainActivity extends AppCompatActivity {
                 //throw new RuntimeException(e);
             } finally {
                 conn.disconnect();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    }
+                });
             }
         }
     }

@@ -44,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+                    ipText.setTextColor(Color.parseColor("#000000"));
+                    ipText.setText("Please wait...");
                 }
             });
 
@@ -57,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        ipText.setTextColor(Color.parseColor("#000000"));
+                        ipText.setText("Opening connection failed!");
+
                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     }
                 });
@@ -93,14 +99,27 @@ public class MainActivity extends AppCompatActivity {
                     }
                     Log.i(TAG, "ConnectThread received data " + outputData);
                     String finalOutputData = outputData;
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ipText.setTextColor(Color.parseColor("#008800"));
-                            ipText.setText(finalOutputData);
-                            sendButton.setEnabled(true);
-                        }
-                    });
+                    JSONObject responseJsonObject = new JSONObject(finalOutputData);
+                    Boolean nat = (Boolean) responseJsonObject.get("nat");
+                    if(nat){
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ipText.setTextColor(Color.parseColor("#008800"));
+                                ipText.setText("OK");
+                                sendButton.setEnabled(true);
+                            }
+                        });
+                    } else{
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ipText.setTextColor(Color.parseColor("#FF0000"));
+                                ipText.setText("NOT OK");
+                                sendButton.setEnabled(true);
+                            }
+                        });
+                    }
                 } else{
                     String responseMessage = conn.getResponseMessage();
                     BufferedReader isr = new BufferedReader(

@@ -22,6 +22,6 @@
             android:layout_centerHorizontal="true"
             android:layout_below="@id/button_send"
             android:textColor="#000000"
-            android:text="Text for IP address and OK/not OK and icon"/>
+            android:text="Click SEND to get results"/>
 
 </RelativeLayout>

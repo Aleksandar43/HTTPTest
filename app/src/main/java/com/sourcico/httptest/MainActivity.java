@@ -53,6 +53,22 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            String addressToSend = getAddressToSend();
+            if(addressToSend == null){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        ipText.setTextColor(Color.parseColor("#000000"));
+                        ipText.setText("Did not find any suitable address to send");
+                        sendButton.setEnabled(true);
+
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    }
+                });
+                return;
+            }
+
             HttpURLConnection conn;
             try {
                 URL url = new URL(SERVER);
@@ -82,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 conn.setRequestProperty("Accept","application/json");
 
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("address", getAddressToSend());
+                jsonObject.put("address", addressToSend);
 
                 Log.i(TAG, "ConnectThread sending data " + jsonObject.toString());
                 Log.i(TAG, "ConnectThread request method= " + conn.getRequestMethod());

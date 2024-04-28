@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String SERVER = "https://s7om3fdgbt7lcvqdnxitjmtiim0uczux.lambda-url.us-east-2.on.aws/";
 
     Button sendButton;
+    ProgressBar progressBar;
     TextView ipText;
 
     static {
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+                    progressBar.setVisibility(View.VISIBLE);
                     ipText.setTextColor(Color.parseColor("#000000"));
                     ipText.setText("Please wait...");
                 }
@@ -60,8 +63,10 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        progressBar.setVisibility(View.INVISIBLE);
                         ipText.setTextColor(Color.parseColor("#000000"));
                         ipText.setText("Opening connection failed!");
+                        sendButton.setEnabled(true);
 
                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     }
@@ -105,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                progressBar.setVisibility(View.INVISIBLE);
                                 ipText.setTextColor(Color.parseColor("#008800"));
                                 ipText.setText("OK");
                                 sendButton.setEnabled(true);
@@ -114,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                progressBar.setVisibility(View.INVISIBLE);
                                 ipText.setTextColor(Color.parseColor("#FF0000"));
                                 ipText.setText("NOT OK");
                                 sendButton.setEnabled(true);
@@ -135,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            progressBar.setVisibility(View.INVISIBLE);
                             ipText.setTextColor(Color.parseColor("#000000"));
                             ipText.setText("Server returned response code " + responseCode + "\nResponse message: " + responseMessage);
                             sendButton.setEnabled(true);
@@ -172,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
 
         sendButton = findViewById(R.id.button_send);
         ipText = findViewById(R.id.text_ip_address);
+        progressBar = findViewById(R.id.progress_bar);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

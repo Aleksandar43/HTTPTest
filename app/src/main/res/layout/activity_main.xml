@@ -15,12 +15,20 @@
             android:layout_centerHorizontal="true"
             android:text="Send"/>
 
+    <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/button_send"
+            android:visibility="invisible"/>
+
     <TextView
             android:id="@+id/text_ip_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/button_send"
+            android:layout_below="@id/progress_bar"
             android:textColor="#000000"
             android:text="Click SEND to get results"/>
 

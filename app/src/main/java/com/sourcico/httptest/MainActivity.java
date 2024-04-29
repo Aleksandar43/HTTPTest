@@ -165,12 +165,17 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 }
-            } catch (IOException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
-                //throw new RuntimeException(e);
-            } catch (JSONException e) {
-                e.printStackTrace();
-                //throw new RuntimeException(e);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressBar.setVisibility(View.INVISIBLE);
+                            ipText.setTextColor(Color.parseColor("#000000"));
+                            ipText.setText("An exception with connection occured");
+                            sendButton.setEnabled(true);
+                        }
+                    });
             } finally {
                 conn.disconnect();
                 runOnUiThread(new Runnable() {

@@ -157,14 +157,14 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                updateOnSendingFinish(addressToSend + " OK", Color.parseColor("#008800"));
+                                updateOnSendingFinish(addressToSend + " ✔", Color.parseColor("#008800"));
                             }
                         });
                     } else{
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                updateOnSendingFinish(addressToSend + "NOT OK", Color.parseColor("#FF0000"));
+                                updateOnSendingFinish(addressToSend + " ❎", Color.parseColor("#FF0000"));
                             }
                         });
                     }

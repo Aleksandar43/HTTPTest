@@ -29,9 +29,27 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "HTTPTest";
     public static final String SERVER = "https://s7om3fdgbt7lcvqdnxitjmtiim0uczux.lambda-url.us-east-2.on.aws/";
 
-    Button sendButton;
-    ProgressBar progressBar;
-    TextView ipText;
+    private Button sendButton;
+    private ProgressBar progressBar;
+    private TextView ipText;
+
+    private void updateOnSendingStart(){
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        sendButton.setEnabled(false);
+        progressBar.setVisibility(View.VISIBLE);
+        ipText.setTextColor(Color.parseColor("#000000"));
+        ipText.setText("Please wait...");
+    }
+
+    private void updateOnSendingFinish(String finishText, int color){
+        progressBar.setVisibility(View.INVISIBLE);
+        ipText.setTextColor(color);
+        ipText.setText(finishText);
+        sendButton.setEnabled(true);
+
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
 
     static {
         System.loadLibrary("getaddr");
@@ -45,11 +63,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-                    progressBar.setVisibility(View.VISIBLE);
-                    ipText.setTextColor(Color.parseColor("#000000"));
-                    ipText.setText("Please wait...");
+                    updateOnSendingStart();
                 }
             });
 
@@ -58,12 +72,8 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        progressBar.setVisibility(View.INVISIBLE);
-                        ipText.setTextColor(Color.parseColor("#000000"));
-                        ipText.setText("Did not find any suitable address to send");
-                        sendButton.setEnabled(true);
-
-                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        updateOnSendingFinish("Did not find any suitable address to send",
+                                Color.parseColor("#000000"));
                     }
                 });
                 return;
@@ -79,12 +89,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        progressBar.setVisibility(View.INVISIBLE);
-                        ipText.setTextColor(Color.parseColor("#000000"));
-                        ipText.setText("Opening connection failed!");
-                        sendButton.setEnabled(true);
-
-                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        updateOnSendingFinish("Opening connection failed!", Color.parseColor("#000000"));
                     }
                 });
                 return;
@@ -126,20 +131,14 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                progressBar.setVisibility(View.INVISIBLE);
-                                ipText.setTextColor(Color.parseColor("#008800"));
-                                ipText.setText("OK");
-                                sendButton.setEnabled(true);
+                                updateOnSendingFinish(addressToSend + " OK", Color.parseColor("#008800"));
                             }
                         });
                     } else{
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                progressBar.setVisibility(View.INVISIBLE);
-                                ipText.setTextColor(Color.parseColor("#FF0000"));
-                                ipText.setText("NOT OK");
-                                sendButton.setEnabled(true);
+                                updateOnSendingFinish(addressToSend + "NOT OK", Color.parseColor("#FF0000"));
                             }
                         });
                     }
@@ -158,10 +157,8 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            ipText.setTextColor(Color.parseColor("#000000"));
-                            ipText.setText("Server returned response code " + responseCode + "\nResponse message: " + responseMessage);
-                            sendButton.setEnabled(true);
+                            updateOnSendingFinish("Server returned response code " + responseCode,
+                                    Color.parseColor("#000000"));
                         }
                     });
                 }
@@ -170,20 +167,12 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            ipText.setTextColor(Color.parseColor("#000000"));
-                            ipText.setText("An exception with connection occured");
-                            sendButton.setEnabled(true);
+                            updateOnSendingFinish("An exception with connection occured",
+                                    Color.parseColor("#000000"));
                         }
                     });
             } finally {
                 conn.disconnect();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                    }
-                });
             }
         }
     }
@@ -205,17 +194,8 @@ public class MainActivity extends AppCompatActivity {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendButton.setEnabled(false);
-
                 ConnectThread connectThread = new ConnectThread();
                 connectThread.start();
-//                try {
-//                    connectThread.join();
-//                } catch (InterruptedException e) {
-//                    Log.i(TAG, "ConnectThread interrupted");
-//                }
-
-                //sendButton.setEnabled(true);
             }
         });
     }

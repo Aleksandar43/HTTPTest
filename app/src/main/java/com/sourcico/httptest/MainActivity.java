@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "HTTPTest";
@@ -33,16 +35,40 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private TextView ipText;
 
+    private Timer delayTimer;
+    private TimerTask delayTask;
+
     private void updateOnSendingStart(){
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         sendButton.setEnabled(false);
+        ipText.setTextColor(Color.parseColor("#000000"));
+        ipText.setText("");
+
+        delayTask = new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateOnSendingDelay();
+                    }
+                });
+            }
+        };
+        delayTimer.schedule(delayTask, 3000);
+    }
+
+    private void updateOnSendingDelay(){
         progressBar.setVisibility(View.VISIBLE);
         ipText.setTextColor(Color.parseColor("#000000"));
         ipText.setText("Please wait...");
     }
 
     private void updateOnSendingFinish(String finishText, int color){
+        delayTask.cancel();
+        delayTask = null;
+
         progressBar.setVisibility(View.INVISIBLE);
         ipText.setTextColor(color);
         ipText.setText(finishText);
@@ -187,6 +213,8 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        delayTimer = new Timer();
 
         sendButton = findViewById(R.id.button_send);
         ipText = findViewById(R.id.text_ip_address);
